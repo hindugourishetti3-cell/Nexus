@@ -1,6 +1,7 @@
 from flask import Flask
 from .config import Config
 from .database import db
+from .models import User
 
 
 def create_app():
