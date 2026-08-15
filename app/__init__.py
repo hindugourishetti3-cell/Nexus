@@ -1,9 +1,10 @@
 from flask import Flask
 from .config import Config
 from .database import db
-from .models import User
+from .models import User,Workspace
 from .auth import auth
 from flask_login import LoginManager, login_required
+from .workspace import workspace
 
 
 login_manager = LoginManager()
@@ -22,6 +23,7 @@ def create_app():
     login_manager.login_view = "auth.login"
 
     app.register_blueprint(auth)
+    app.register_blueprint(workspace)
 
     @login_manager.user_loader
     def load_user(user_id):

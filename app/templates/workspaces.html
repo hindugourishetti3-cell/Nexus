@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nexus - Workspaces</title>
+</head>
+
+<body>
+
+    <h1>Your Workspaces</h1>
+
+    <a href="/workspace/create">
+        Create Workspace
+    </a>
+
+    <hr>
+
+    {% for workspace in workspaces %}
+
+        <h2><a href="{{ url_for('workspace.workspace_detail', workspace_id=workspace.id) }}">
+    {{ workspace.name }}
+    </a></h2>
+
+        <p>{{ workspace.description }}</p>
+
+    {% else %}
+
+        <p>You don't have any workspaces yet.</p>
+
+    {% endfor %}
+
+</body>
+</html>
