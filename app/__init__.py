@@ -3,7 +3,7 @@ from .config import Config
 from .database import db
 from .models import User
 from .auth import auth
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
 
 
 login_manager = LoginManager()
@@ -19,7 +19,7 @@ def create_app():
 
     login_manager.init_app(app)
 
-    login_manager.login_view = "auth.register"
+    login_manager.login_view = "auth.login"
 
     app.register_blueprint(auth)
 
@@ -34,4 +34,8 @@ def create_app():
     def home():
         return "<h1>Nexus is Alive 🚀</h1>"
 
+    @app.route("/dashboard")
+    @login_required
+    def dashboard():
+        return "<h1>Welcome to your Nexus Dashboard 🚀</h1>"
     return app
