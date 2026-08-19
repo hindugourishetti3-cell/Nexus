@@ -18,6 +18,12 @@
     <a href="{{ url_for('workspace.edit_page', page_id=page.id) }}">
         Edit Page
     </a>
+    <form
+        method="POST"
+        action="{{ url_for('workspace.delete_page', page_id=page.id) }}"
+    >
+        <button type="submit">Delete Page</button>
+    </form>
 
 </body>
 </html>

@@ -121,3 +121,20 @@ def edit_page(page_id):
         "create_page.html",
         page=page
     )
+@workspace.route("/page/<int:page_id>/delete", methods=["POST"])
+@login_required
+def delete_page(page_id):
+
+    page = Page.query.get_or_404(page_id)
+
+    workspace_id = page.workspace_id
+
+    db.session.delete(page)
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "workspace.workspace_detail",
+            workspace_id=workspace_id
+        )
+    )
