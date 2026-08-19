@@ -54,3 +54,12 @@ class Workspace(db.Model):
         db.ForeignKey("users.id"),
         nullable=False
     )
+class Page(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, default="")
+    workspace_id = db.Column(
+        db.Integer,
+        db.ForeignKey("workspaces.id"),
+        nullable=False
+    )

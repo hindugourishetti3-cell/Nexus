@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from .database import db
-from .models import Workspace
+from .models import Workspace, Page
 
 workspace = Blueprint("workspace", __name__)
 
@@ -47,7 +47,43 @@ def workspace_detail(workspace_id):
 
     selected_workspace = Workspace.query.get_or_404(workspace_id)
 
+    pages = Page.query.filter_by(
+        workspace_id=selected_workspace.id
+    ).all()
+
     return render_template(
         "workspace_detail.html",
+        workspace=selected_workspace,
+        pages=pages
+    )
+@workspace.route("/workspace/<int:workspace_id>/page/create", methods=["GET", "POST"])
+@login_required
+def create_page(workspace_id):
+
+    selected_workspace = Workspace.query.get_or_404(workspace_id)
+
+    if request.method == "POST":
+
+        title = request.form["title"]
+        content = request.form["content"]
+
+        new_page = Page(
+            title=title,
+            content=content,
+            workspace_id=selected_workspace.id
+        )
+
+        db.session.add(new_page)
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "workspace.workspace_detail",
+                workspace_id=selected_workspace.id
+            )
+        )
+
+    return render_template(
+        "create_page.html",
         workspace=selected_workspace
     )

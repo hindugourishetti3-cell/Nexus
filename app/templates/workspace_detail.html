@@ -13,7 +13,29 @@
 
     <h2>Pages</h2>
 
-    <p>No pages yet.</p>
+    <a href="{{ url_for('workspace.create_page', workspace_id=workspace.id) }}">
+        + Create Page
+    </a>
+
+    <br><br>
+
+    {% if pages %}
+
+        {% for page in pages %}
+
+            <div>
+                <a href="#">
+                    {{ page.title }}
+                </a>
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No pages yet.</p>
+
+    {% endif %}
 
 </body>
 </html>
