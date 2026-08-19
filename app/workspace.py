@@ -138,3 +138,27 @@ def delete_page(page_id):
             workspace_id=workspace_id
         )
     )
+@workspace.route("/workspace/<int:workspace_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_workspace(workspace_id):
+
+    selected_workspace = Workspace.query.get_or_404(workspace_id)
+
+    if request.method == "POST":
+
+        selected_workspace.name = request.form["name"]
+        selected_workspace.description = request.form["description"]
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "workspace.workspace_detail",
+                workspace_id=selected_workspace.id
+            )
+        )
+
+    return render_template(
+        "edit_workspace.html",
+        workspace=selected_workspace
+    )

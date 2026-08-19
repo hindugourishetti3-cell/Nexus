@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Workspace</title>
+</head>
+<body>
+
+    <h1>Edit Workspace</h1>
+
+    <form method="POST">
+
+        <label>Workspace Name</label>
+        <br>
+
+        <input
+            type="text"
+            name="name"
+            value="{{ workspace.name }}"
+            required
+        >
+
+        <br><br>
+
+        <label>Description</label>
+        <br>
+
+        <textarea
+            name="description"
+            rows="5"
+            cols="50"
+        >{{ workspace.description or '' }}</textarea>
+
+        <br><br>
+
+        <button type="submit">Save Changes</button>
+
+    </form>
+
+</body>
+</html>

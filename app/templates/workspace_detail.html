@@ -8,6 +8,9 @@
     <h1>{{ workspace.name }}</h1>
 
     <p>{{ workspace.description }}</p>
+    <a href="{{ url_for('workspace.edit_workspace', workspace_id=workspace.id) }}">
+        Edit Workspace
+    </a>
 
     <hr>
 
