@@ -11,6 +11,12 @@
     <a href="{{ url_for('workspace.edit_workspace', workspace_id=workspace.id) }}">
         Edit Workspace
     </a>
+    <form
+        method="POST"
+        action="{{ url_for('workspace.delete_workspace', workspace_id=workspace.id) }}"
+    >
+        <button type="submit">Delete Workspace</button>
+    </form>
 
     <hr>
 

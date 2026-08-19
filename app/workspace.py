@@ -162,3 +162,17 @@ def edit_workspace(workspace_id):
         "edit_workspace.html",
         workspace=selected_workspace
     )
+@workspace.route("/workspace/<int:workspace_id>/delete", methods=["POST"])
+@login_required
+def delete_workspace(workspace_id):
+
+    selected_workspace = Workspace.query.get_or_404(workspace_id)
+
+    Page.query.filter_by(
+        workspace_id=selected_workspace.id
+    ).delete()
+
+    db.session.delete(selected_workspace)
+    db.session.commit()
+
+    return redirect(url_for("workspace.workspaces"))
