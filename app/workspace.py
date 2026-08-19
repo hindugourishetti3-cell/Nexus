@@ -87,3 +87,37 @@ def create_page(workspace_id):
         "create_page.html",
         workspace=selected_workspace
     )
+@workspace.route("/page/<int:page_id>")
+@login_required
+def view_page(page_id):
+
+    page = Page.query.get_or_404(page_id)
+
+    return render_template(
+        "page.html",
+        page=page
+    )
+@workspace.route("/page/<int:page_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_page(page_id):
+
+    page = Page.query.get_or_404(page_id)
+
+    if request.method == "POST":
+
+        page.title = request.form["title"]
+        page.content = request.form["content"]
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "workspace.view_page",
+                page_id=page.id
+            )
+        )
+
+    return render_template(
+        "create_page.html",
+        page=page
+    )

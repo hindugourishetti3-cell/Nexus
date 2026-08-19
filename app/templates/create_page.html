@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create Page</title>
+    <title>
+        {% if page %}
+            Edit Page
+        {% else %}
+            Create Page
+        {% endif %}
+    </title>
 </head>
 <body>
 
-    <h1>Create Page</h1>
+    {% if page %}
+        <h1>Edit Page</h1>
+    {% else %}
+        <h1>Create Page</h1>
+    {% endif %}
 
     <form method="POST">
 
@@ -13,6 +23,7 @@
             type="text"
             name="title"
             placeholder="Page title"
+            value="{{ page.title if page else '' }}"
             required
         >
 
@@ -23,11 +34,17 @@
             placeholder="Write your content..."
             rows="15"
             cols="60"
-        ></textarea>
+        >{{ page.content if page else '' }}</textarea>
 
         <br><br>
 
-        <button type="submit">Create Page</button>
+        <button type="submit">
+            {% if page %}
+                Save Changes
+            {% else %}
+                Create Page
+            {% endif %}
+        </button>
 
     </form>
 
