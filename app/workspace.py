@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
+import markdown
 from flask_login import login_required, current_user
 from .database import db
 from .models import Workspace, Page
@@ -93,9 +94,15 @@ def view_page(page_id):
 
     page = Page.query.get_or_404(page_id)
 
+    rendered_content = markdown.markdown(
+        page.content,
+        extensions=["fenced_code", "tables"]
+    )
+
     return render_template(
         "page.html",
-        page=page
+        page=page,
+        rendered_content=rendered_content
     )
 @workspace.route("/page/<int:page_id>/edit", methods=["GET", "POST"])
 @login_required

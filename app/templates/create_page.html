@@ -9,6 +9,7 @@
         {% endif %}
     </title>
 </head>
+
 <body>
 
     {% if page %}
@@ -18,6 +19,9 @@
     {% endif %}
 
     <form method="POST">
+
+        <label>Title</label>
+        <br>
 
         <input
             type="text"
@@ -29,11 +33,14 @@
 
         <br><br>
 
+        <label>Content</label>
+        <br>
+
         <textarea
             name="content"
-            placeholder="Write your content..."
-            rows="15"
-            cols="60"
+            placeholder="Write your notes here..."
+            rows="20"
+            cols="80"
         >{{ page.content if page else '' }}</textarea>
 
         <br><br>
@@ -45,6 +52,16 @@
                 Create Page
             {% endif %}
         </button>
+
+        {% if page %}
+            <a href="{{ url_for('workspace.view_page', page_id=page.id) }}">
+                Cancel
+            </a>
+        {% else %}
+            <a href="{{ url_for('workspace.workspace_detail', workspace_id=workspace.id) }}">
+                Cancel
+            </a>
+        {% endif %}
 
     </form>
 
