@@ -176,3 +176,35 @@ def delete_workspace(workspace_id):
     db.session.commit()
 
     return redirect(url_for("workspace.workspaces"))
+@workspace.route("/search")
+@login_required
+def search():
+
+    query = request.args.get("q", "").strip()
+
+    workspaces = []
+    pages = []
+
+    if query:
+
+        workspaces = Workspace.query.filter(
+            Workspace.owner_id == current_user.id,
+            Workspace.name.ilike(f"%{query}%") |
+            Workspace.description.ilike(f"%{query}%")
+        ).all()
+
+        pages = Page.query.join(
+            Workspace,
+            Page.workspace_id == Workspace.id
+        ).filter(
+            Workspace.owner_id == current_user.id,
+            Page.title.ilike(f"%{query}%") |
+            Page.content.ilike(f"%{query}%")
+        ).all()
+
+    return render_template(
+        "search.html",
+        query=query,
+        workspaces=workspaces,
+        pages=pages
+    )

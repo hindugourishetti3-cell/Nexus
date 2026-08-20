@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Nexus</title>
+</head>
+
+<body>
+
+    <h1>Search Nexus</h1>
+
+    <form method="GET" action="{{ url_for('workspace.search') }}">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="Search workspaces and pages..."
+            value="{{ query }}"
+        >
+
+        <button type="submit">Search</button>
+
+    </form>
+
+    <hr>
+
+    {% if query %}
+
+        <h2>Search Results for "{{ query }}"</h2>
+
+        <!-- WORKSPACES -->
+
+        <h3>Workspaces</h3>
+
+        {% if workspaces %}
+
+            {% for workspace in workspaces %}
+
+                <div>
+                    <h3>
+                        <a href="{{ url_for(
+                            'workspace.workspace_detail',
+                            workspace_id=workspace.id
+                        ) }}">
+                            {{ workspace.name }}
+                        </a>
+                    </h3>
+
+                    <p>{{ workspace.description }}</p>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No workspaces found.</p>
+
+        {% endif %}
+
+
+        <!-- PAGES -->
+
+        <h3>Pages</h3>
+
+        {% if pages %}
+
+            {% for page in pages %}
+
+                <div>
+                    <h3>
+                        <a href="{{ url_for(
+                            'workspace.view_page',
+                            page_id=page.id
+                        ) }}">
+                            {{ page.title }}
+                        </a>
+                    </h3>
+
+                    <p>{{ page.content }}</p>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No pages found.</p>
+
+        {% endif %}
+
+    {% endif %}
+
+</body>
+</html>
