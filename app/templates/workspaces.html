@@ -6,9 +6,29 @@
 
 <body>
 
+    <nav>
+
     <h1>Nexus</h1>
 
-    <p>Welcome, {{ current_user.username }}!</p>
+    <a href="{{ url_for('workspace.workspaces') }}">
+        Workspaces
+    </a>
+
+    &nbsp; | &nbsp;
+
+    <a href="{{ url_for('workspace.search') }}">
+        Search
+    </a>
+
+    &nbsp; | &nbsp;
+
+    <a href="{{ url_for('auth.logout') }}">
+        Logout
+    </a>
+
+</nav>
+
+<p>Welcome, {{ current_user.username }}!</p>
 
     <hr>
 
