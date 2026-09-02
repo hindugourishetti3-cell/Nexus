@@ -6,27 +6,51 @@
 
 <body>
 
-    <h1>Your Workspaces</h1>
+    <h1>Nexus</h1>
 
-    <a href="/workspace/create">
-        Create Workspace
-    </a>
+    <p>Welcome, {{ current_user.username }}!</p>
 
     <hr>
 
-    {% for workspace in workspaces %}
+    <h2>Your Workspaces</h2>
 
-        <h2><a href="{{ url_for('workspace.workspace_detail', workspace_id=workspace.id) }}">
-    {{ workspace.name }}
-    </a></h2>
+    <a href="{{ url_for('workspace.create_workspace') }}">
+        + Create Workspace
+    </a>
 
-        <p>{{ workspace.description }}</p>
+    <br><br>
+
+    {% if workspaces %}
+
+        {% for workspace in workspaces %}
+
+            <div>
+                <h3>
+                    <a href="{{ url_for(
+                        'workspace.workspace_detail',
+                        workspace_id=workspace.id
+                    ) }}">
+                        {{ workspace.name }}
+                    </a>
+                </h3>
+
+                {% if workspace.description %}
+                    <p>{{ workspace.description }}</p>
+                {% else %}
+                    <p>No description</p>
+                {% endif %}
+
+            </div>
+
+            <hr>
+
+        {% endfor %}
 
     {% else %}
 
         <p>You don't have any workspaces yet.</p>
 
-    {% endfor %}
+    {% endif %}
 
 </body>
 </html>
