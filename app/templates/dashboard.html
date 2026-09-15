@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nexus - Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark">N</span>
+            <span>Nexus</span>
+        </a>
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item active"
+            >
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('workspace.workspaces') }}"
+                class="nav-item"
+            >
+                <span class="nav-icon">▣</span>
+                Workspaces
+            </a>
+
+            <a
+                href="{{ url_for('workspace.search') }}"
+                class="nav-item"
+            >
+                <span class="nav-icon">⌕</span>
+                Search
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-divider"></div>
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+                class="nav-item logout"
+            >
+                <span class="nav-icon">↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main -->
+    <div class="main-shell">
+
+        <header class="topbar">
+
+            <form
+                class="top-search"
+                method="GET"
+                action="{{ url_for('workspace.search') }}"
+            >
+                <span>⌕</span>
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search your knowledge..."
+                >
+            </form>
+
+
+            <div class="topbar-user">
+
+                <div class="avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>Knowledge space</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="main-content">
+
+            <div class="page-header">
+
+                <div>
+                    <p class="eyebrow">Overview</p>
+
+                    <h1>Welcome back, {{ current_user.username }}.</h1>
+
+                    <p class="page-subtitle">
+                        Keep your knowledge organized and connected.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ url_for('workspace.create_workspace') }}"
+                    class="primary-button"
+                >
+                    + New Workspace
+                </a>
+
+            </div>
+
+
+            <!-- Stats -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ▣
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Workspaces</span>
+                        <strong>{{ workspace_count }}</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ▤
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Pages</span>
+                        <strong>{{ page_count }}</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ⌕
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Knowledge</span>
+                        <strong>Active</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Recent Pages -->
+
+            <section class="content-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h2>Recent Pages</h2>
+                        <p>Your latest knowledge entries.</p>
+                    </div>
+
+                </div>
+
+
+                {% if recent_pages %}
+
+                    <div class="recent-pages">
+
+                        {% for page in recent_pages %}
+
+                            <a
+                                href="{{ url_for(
+                                    'workspace.view_page',
+                                    page_id=page.id
+                                ) }}"
+                                class="page-card"
+                            >
+
+                                <div class="page-icon">
+                                    ▤
+                                </div>
+
+                                <div class="page-card-content">
+
+                                    <strong>
+                                        {{ page.title }}
+                                    </strong>
+
+                                    <span>
+                                        Recently updated
+                                    </span>
+
+                                </div>
+
+                                <span class="page-arrow">→</span>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">▤</div>
+
+                        <h3>No pages yet</h3>
+
+                        <p>
+                            Create your first page inside a workspace.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- Workspaces -->
+
+            <section class="content-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h2>Your Workspaces</h2>
+                        <p>Organize your knowledge by project or topic.</p>
+                    </div>
+
+                    <a
+                        href="{{ url_for('workspace.workspaces') }}"
+                        class="text-link"
+                    >
+                        View all →
+                    </a>
+
+                </div>
+
+
+                {% if workspaces %}
+
+                    <div class="workspace-grid">
+
+                        {% for workspace in workspaces %}
+
+                            <a
+                                href="{{ url_for(
+                                    'workspace.workspace_detail',
+                                    workspace_id=workspace.id
+                                ) }}"
+                                class="workspace-card"
+                            >
+
+                                <div class="workspace-icon">
+                                    ▣
+                                </div>
+
+                                <div>
+
+                                    <h3>
+                                        {{ workspace.name }}
+                                    </h3>
+
+                                    <p>
+                                        {% if workspace.description %}
+                                            {{ workspace.description }}
+                                        {% else %}
+                                            No description
+                                        {% endif %}
+                                    </p>
+
+                                </div>
+
+                                <span class="page-arrow">→</span>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">▣</div>
+
+                        <h3>No workspaces yet</h3>
+
+                        <p>Create your first workspace to get started.</p>
+
+                        <a
+                            href="{{ url_for('workspace.create_workspace') }}"
+                            class="primary-button"
+                        >
+                            + Create Workspace
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -29,6 +29,8 @@ class User(UserMixin, db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+
 class Workspace(db.Model):
     __tablename__ = "workspaces"
 
@@ -54,10 +56,26 @@ class Workspace(db.Model):
         db.ForeignKey("users.id"),
         nullable=False
     )
+
+
 class Page(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, default="")
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    content = db.Column(
+        db.Text,
+        default=""
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
     workspace_id = db.Column(
         db.Integer,
         db.ForeignKey("workspaces.id"),

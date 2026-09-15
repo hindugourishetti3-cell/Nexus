@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, render_template
 from .config import Config
 from .database import db
-from .models import User,Workspace
+from .models import User, Workspace, Page
 from .auth import auth
-from flask_login import LoginManager, login_required
+from flask_login import LoginManager, login_required, current_user
 from .workspace import workspace
 
 
@@ -39,5 +39,35 @@ def create_app():
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        return "<h1>Welcome to your Nexus Dashboard 🚀</h1>"
+
+        user_workspaces = Workspace.query.filter_by(
+            owner_id=current_user.id
+        ).all()
+
+        workspace_count = len(user_workspaces)
+
+        page_count = Page.query.join(
+            Workspace,
+            Page.workspace_id == Workspace.id
+        ).filter(
+            Workspace.owner_id == current_user.id
+        ).count()
+
+        recent_pages = Page.query.join(
+            Workspace,
+            Page.workspace_id == Workspace.id
+        ).filter(
+            Workspace.owner_id == current_user.id
+        ).order_by(
+            Page.created_at.desc()
+        ).limit(5).all()
+
+        return render_template(
+            "dashboard.html",
+            workspace_count=workspace_count,
+            page_count=page_count,
+            recent_pages=recent_pages,
+            workspaces=user_workspaces
+        )
+
     return app
