@@ -126,7 +126,8 @@ def edit_page(page_id):
 
     return render_template(
         "create_page.html",
-        page=page
+        page=page,
+        workspace=Workspace.query.get_or_404(page.workspace_id)
     )
 @workspace.route("/page/<int:page_id>/delete", methods=["POST"])
 @login_required

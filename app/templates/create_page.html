@@ -1,69 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>
-        {% if page %}
-            Edit Page
-        {% else %}
-            Create Page
-        {% endif %}
+    Nexus - {{ "Edit Page" if page else "Create Page" }}
     </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
 
 <body>
 
-    {% if page %}
-        <h1>Edit Page</h1>
-    {% else %}
-        <h1>Create Page</h1>
-    {% endif %}
+<div class="app-shell">
 
-    <form method="POST">
+    <aside class="sidebar">
 
-        <label>Title</label>
-        <br>
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark">N</span>
+            <span>Nexus</span>
+        </a>
 
-        <input
-            type="text"
-            name="title"
-            placeholder="Page title"
-            value="{{ page.title if page else '' }}"
-            required
-        >
+        <nav class="sidebar-nav">
 
-        <br><br>
-
-        <label>Content</label>
-        <br>
-
-        <textarea
-            name="content"
-            placeholder="Write your notes here..."
-            rows="20"
-            cols="80"
-        >{{ page.content if page else '' }}</textarea>
-
-        <br><br>
-
-        <button type="submit">
-            {% if page %}
-                Save Changes
-            {% else %}
-                Create Page
-            {% endif %}
-        </button>
-
-        {% if page %}
-            <a href="{{ url_for('workspace.view_page', page_id=page.id) }}">
-                Cancel
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                Dashboard
             </a>
-        {% else %}
-            <a href="{{ url_for('workspace.workspace_detail', workspace_id=workspace.id) }}">
-                Cancel
-            </a>
-        {% endif %}
 
-    </form>
+            <a
+                href="{{ url_for('workspace.workspaces') }}"
+                class="nav-item active"
+            >
+                <span class="nav-icon">▣</span>
+                Workspaces
+            </a>
+
+            <a href="{{ url_for('workspace.search') }}" class="nav-item">
+                <span class="nav-icon">⌕</span>
+                Search
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-divider"></div>
+
+            <a href="{{ url_for('auth.logout') }}" class="nav-item">
+                <span class="nav-icon">↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <div class="main-shell">
+
+        <header class="topbar">
+
+            <form
+                class="top-search"
+                method="GET"
+                action="{{ url_for('workspace.search') }}"
+            >
+                <span>⌕</span>
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search your knowledge..."
+                >
+            </form>
+
+            <div class="topbar-user">
+
+                <div class="avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>Knowledge space</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="main-content">
+
+            <div class="breadcrumb">
+
+                <a href="{{ url_for('workspace.workspaces') }}">
+                    Workspaces
+                </a>
+
+                <span>›</span>
+
+                <a
+                    href="{{ url_for(
+                        'workspace.workspace_detail',
+                        workspace_id=workspace.id
+                    ) }}"
+                >
+                    {{ workspace.name }}
+                </a>
+
+                <span>›</span>
+
+                <span>New Page</span>
+
+            </div>
+
+
+            <div class="page-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        {{ workspace.name }}
+                    </p>
+
+                    <h1>
+                        {{ "Edit Page" if page else "Create a New Page" }}
+                    </h1>
+
+                    <p class="page-subtitle">
+                        Capture and organize your knowledge using Markdown.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <section class="editor-card">
+
+                <form method="POST">
+
+                    <div class="form-group">
+
+                        <label for="title">
+                            Page title
+                        </label>
+
+                        <input
+                            id="title"
+                            type="text"
+                            name="title"
+                            value="{{ page.title if page else '' }}"
+                            placeholder="e.g. Python Notes"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="content">
+                            Content
+                        </label>
+
+                        <textarea
+                            id="content"
+                            name="content"
+                            class="page-editor"
+                            placeholder="# Your notes
+
+Start writing your knowledge here...
+
+## Example
+
+You can use **Markdown** to format your content."
+                        >{{ page.content if page else '' }}</textarea>
+
+                        <div class="editor-hint">
+                            Markdown supported · Use # for headings,
+                            **text** for bold, and ``` for code blocks.
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <a
+                            href="{{ url_for(
+                                'workspace.workspace_detail',
+                                workspace_id=workspace.id
+                            ) }}"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            {{ "Save Changes" if page else "Create Page" }}
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
 
 </body>
 </html>
