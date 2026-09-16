@@ -480,3 +480,82 @@ a {
         width: 220px;
     }
 }
+/* Workspace detail */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: var(--secondary);
+    font-size: 12px;
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.secondary-button:hover {
+    border-color: #c7d2fe;
+    color: var(--primary);
+}
+
+.danger-zone {
+    background: white;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.danger-zone h3 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.danger-zone p {
+    margin: 5px 0 0;
+    color: var(--secondary);
+    font-size: 12px;
+}
+
+.danger-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: var(--danger);
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.danger-button:hover {
+    background: #fef2f2;
+}
