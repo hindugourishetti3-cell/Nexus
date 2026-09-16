@@ -1,36 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Create Workspace - Nexus</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nexus - Create Workspace</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
 
 <body>
 
-    <h1>Create Workspace</h1>
+<div class="app-shell">
 
-    <form method="POST">
+    <aside class="sidebar">
 
-        <input
-            type="text"
-            name="name"
-            placeholder="Workspace name"
-            required
-        >
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark">N</span>
+            <span>Nexus</span>
+        </a>
 
-        <br><br>
+        <nav class="sidebar-nav">
 
-        <textarea
-            name="description"
-            placeholder="Description"
-        ></textarea>
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
 
-        <br><br>
+            <a
+                href="{{ url_for('workspace.workspaces') }}"
+                class="nav-item active"
+            >
+                <span class="nav-icon">▣</span>
+                Workspaces
+            </a>
 
-        <button type="submit">
-            Create Workspace
-        </button>
+            <a href="{{ url_for('workspace.search') }}" class="nav-item">
+                <span class="nav-icon">⌕</span>
+                Search
+            </a>
 
-    </form>
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-divider"></div>
+
+            <a href="{{ url_for('auth.logout') }}" class="nav-item">
+                <span class="nav-icon">↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <div class="main-shell">
+
+        <header class="topbar">
+
+            <form
+                class="top-search"
+                method="GET"
+                action="{{ url_for('workspace.search') }}"
+            >
+                <span>⌕</span>
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search your knowledge..."
+                >
+            </form>
+
+            <div class="topbar-user">
+
+                <div class="avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>Knowledge space</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="main-content">
+
+            <div class="breadcrumb">
+
+                <a href="{{ url_for('workspace.workspaces') }}">
+                    Workspaces
+                </a>
+
+                <span>›</span>
+
+                <span>Create Workspace</span>
+
+            </div>
+
+
+            <div class="page-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Workspace
+                    </p>
+
+                    <h1>
+                        Create a Workspace
+                    </h1>
+
+                    <p class="page-subtitle">
+                        Create a space to organize your knowledge.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <section class="form-card">
+
+                <form method="POST">
+
+                    <div class="form-group">
+
+                        <label for="name">
+                            Workspace name
+                        </label>
+
+                        <input
+                            id="name"
+                            type="text"
+                            name="name"
+                            placeholder="e.g. Web Development"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="description">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            placeholder="What will you use this workspace for?"
+                            rows="5"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <a
+                            href="{{ url_for('workspace.workspaces') }}"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Create Workspace
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
 
 </body>
 </html>
