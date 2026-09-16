@@ -147,38 +147,7 @@
             </div>
 
 
-            <!-- Large Search Box -->
-
-            <section class="search-panel">
-
-                <form
-                    method="GET"
-                    action="{{ url_for('workspace.search') }}"
-                    class="search-form"
-                >
-
-                    <span class="search-form-icon">
-                        ⌕
-                    </span>
-
-                    <input
-                        type="text"
-                        name="q"
-                        value="{{ query }}"
-                        placeholder="Search workspaces, pages, notes..."
-                        autofocus
-                    >
-
-                    <button
-                        type="submit"
-                        class="primary-button"
-                    >
-                        Search
-                    </button>
-
-                </form>
-
-            </section>
+            
 
 
             {% if query %}

@@ -742,38 +742,9 @@ a {
 .page-footer {
     margin-top: 18px;
 }
-/* Search */
 
-.search-panel {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 30px;
-}
 
-.search-form {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
-.search-form-icon {
-    color: var(--secondary);
-    font-size: 18px;
-}
-
-.search-form input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    color: var(--text);
-}
-
-.search-form input::placeholder {
-    color: #94a3b8;
-}
 
 .result-count {
     min-width: 28px;
