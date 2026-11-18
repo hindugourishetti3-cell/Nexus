@@ -5,10 +5,11 @@ from .models import User, Workspace, Page
 from .auth import auth
 from flask_login import LoginManager, login_required, current_user
 from .workspace import workspace
+from flask_wtf.csrf import CSRFProtect
 
 
 login_manager = LoginManager()
-
+csrf = CSRFProtect()
 
 def create_app():
 
@@ -16,6 +17,7 @@ def create_app():
 
     app.config.from_object(Config)
 
+    csrf.init_app(app)
     db.init_app(app)
 
     login_manager.init_app(app)

@@ -146,7 +146,7 @@
             <section class="editor-card">
 
                 <form method="POST">
-
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
 
                         <label for="title">
@@ -171,18 +171,31 @@
                             Content
                         </label>
 
-                        <textarea
-                            id="content"
-                            name="content"
-                            class="page-editor"
-                            placeholder="# Your notes
+                        
+<div class="editor-layout">
+
+    <textarea
+        id="content"
+        name="content"
+        class="page-editor"
+        placeholder="# Your notes
 
 Start writing your knowledge here...
 
 ## Example
 
 You can use **Markdown** to format your content."
-                        >{{ page.content if page else '' }}</textarea>
+    >{{ page.content if page else '' }}</textarea>
+
+    <div class="preview-panel">
+        <div class="preview-heading">Live Preview</div>
+        <div id="markdown-preview" class="preview-content">
+            Start typing to see your preview...
+        </div>
+    </div>
+
+</div>
+
 
                         <div class="editor-hint">
                             Markdown supported · Use # for headings,
@@ -222,6 +235,34 @@ You can use **Markdown** to format your content."
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+
+<script>
+    const editor = document.getElementById("content");
+    const preview = document.getElementById("markdown-preview");
+
+    function updatePreview() {
+        const markdownText = editor.value;
+
+        if (typeof marked === "undefined" ||
+            typeof DOMPurify === "undefined") {
+            preview.textContent =
+                "Preview libraries unavailable. Check your internet connection.";
+            return;
+        }
+
+        const html = marked.parse(markdownText || "*Start writing...*");
+
+        preview.innerHTML = DOMPurify.sanitize(html);
+    }
+
+    editor.addEventListener("input", updatePreview);
+
+    updatePreview();
+</script>
+
 
 </body>
 </html>

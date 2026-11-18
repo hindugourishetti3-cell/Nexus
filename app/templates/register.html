@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +8,7 @@
 <body>
 
     <h1>Create your Nexus account</h1>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
             <p class="{{ category }}">{{ message }}</p>
@@ -14,6 +16,8 @@
     {% endwith %}
 
     <form method="POST">
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <input
             type="text"

@@ -148,6 +148,7 @@
                             'Delete this page?'
                         );"
                     >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button
                             type="submit"
                             class="danger-button"
