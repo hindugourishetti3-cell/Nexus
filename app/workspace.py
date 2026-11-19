@@ -2,9 +2,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 import markdown
 import bleach
+import re
+import html
+
 from flask_login import login_required, current_user
+from sqlalchemy import func
+
 from .database import db
-from .models import Workspace, Page
 from .models import Workspace, Page, PageVersion
 
 workspace = Blueprint("workspace", __name__)
@@ -28,6 +32,54 @@ def get_owned_page(page_id):
         Workspace.owner_id == current_user.id
     ).first_or_404()
 
+# Convert [[Page Title]] into clickable internal links
+def render_internal_links(content, workspace_id):
+    pattern = re.compile(r"\[\[\s*(.*?)\s*\]\]")
+
+    def replace_link(match):
+        title = match.group(1).strip()
+
+        if not title:
+            return html.escape(match.group(0))
+
+        target_page = Page.query.filter(
+            Page.workspace_id == workspace_id,
+            func.lower(Page.title) == title.lower()
+        ).first()
+
+        if target_page:
+            link = url_for(
+                "workspace.view_page",
+                page_id=target_page.id
+            )
+
+            return (
+                f'<a href="{link}">'
+                f'{html.escape(target_page.title)}</a>'
+            )
+
+        return html.escape(match.group(0))
+
+    return pattern.sub(replace_link, content or "")
+
+
+# Find pages that link to the current page
+def get_backlinks(page):
+    candidate_pages = Page.query.filter(
+        Page.workspace_id == page.workspace_id,
+        Page.id != page.id
+    ).all()
+
+    pattern = re.compile(
+        r"\[\[\s*" + re.escape(page.title) + r"\s*\]\]",
+        re.IGNORECASE
+    )
+
+    return [
+        candidate
+        for candidate in candidate_pages
+        if pattern.search(candidate.content or "")
+    ]
 
 # Display all workspaces
 @workspace.route("/workspaces")
@@ -182,8 +234,14 @@ def create_child_page(page_id):
 def view_page(page_id):
     page = get_owned_page(page_id)
 
+    # Convert internal links before Markdown rendering
+    linked_content = render_internal_links(
+        page.content,
+        page.workspace_id
+    )
+
     raw_html = markdown.markdown(
-        page.content or "",
+        linked_content,
         extensions=["fenced_code", "tables"]
     )
 
@@ -210,11 +268,14 @@ def view_page(page_id):
         strip=True
     )
 
+    backlinks = get_backlinks(page)
+
     return render_template(
         "page.html",
         page=page,
         rendered_content=rendered_content,
-        child_pages=page.children
+        child_pages=page.children,
+        backlinks=backlinks
     )
 
 

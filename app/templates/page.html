@@ -223,7 +223,49 @@
                 {% endif %}
 
             </section>
+            <!-- Incoming Backlinks Section -->
+            <section class="subpages-section">
 
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Knowledge Connections</p>
+                        <h2>Incoming Backlinks</h2>
+                    </div>
+                </div>
+
+                {% if backlinks %}
+
+                    <div class="subpage-list">
+
+                        {% for backlink in backlinks %}
+
+                            <a
+                                href="{{ url_for('workspace.view_page', page_id=backlink.id) }}"
+                                class="subpage-item"
+                            >
+                                <span class="subpage-icon">↗</span>
+
+                                <span class="subpage-title">
+                                    {{ backlink.title }}
+                                </span>
+
+                                <span class="subpage-arrow">→</span>
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-subpages">
+                        <p>No incoming backlinks yet.</p>
+                        <span>Other pages linking to this page will appear here.</span>
+                    </div>
+
+                {% endif %}
+
+            </section>
             <div class="page-footer">
 
                 <a
