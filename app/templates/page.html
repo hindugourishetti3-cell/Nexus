@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Nexus - {{ page.title }}</title>
 
     <link
@@ -31,10 +31,8 @@
                 Dashboard
             </a>
 
-            <a
-                href="{{ url_for('workspace.workspaces') }}"
-                class="nav-item active"
-            >
+            <a href="{{ url_for('workspace.workspaces') }}"
+               class="nav-item active">
                 <span class="nav-icon">▣</span>
                 Workspaces
             </a>
@@ -47,28 +45,24 @@
         </nav>
 
         <div class="sidebar-bottom">
-
             <div class="sidebar-divider"></div>
 
             <a href="{{ url_for('auth.logout') }}" class="nav-item">
                 <span class="nav-icon">↪</span>
                 Logout
             </a>
-
         </div>
 
     </aside>
-
 
     <div class="main-shell">
 
         <header class="topbar">
 
-            <form
-                class="top-search"
-                method="GET"
-                action="{{ url_for('workspace.search') }}"
-            >
+            <form class="top-search"
+                  method="GET"
+                  action="{{ url_for('workspace.search') }}">
+
                 <span>⌕</span>
 
                 <input
@@ -93,7 +87,6 @@
 
         </header>
 
-
         <main class="main-content">
 
             <div class="breadcrumb">
@@ -103,28 +96,16 @@
                 </a>
 
                 <span>›</span>
-
-                <span>
-                    Page
-                </span>
+                <span>{{ page.title }}</span>
 
             </div>
-
 
             <div class="page-header">
 
                 <div>
-
-                    <p class="eyebrow">
-                        Knowledge Page
-                    </p>
-
-                    <h1>
-                        {{ page.title }}
-                    </h1>
-
+                    <p class="eyebrow">Knowledge Page</p>
+                    <h1>{{ page.title }}</h1>
                 </div>
-
 
                 <div class="header-actions">
 
@@ -138,21 +119,33 @@
                         Edit
                     </a>
 
+                    <a
+                        href="{{ url_for(
+                            'workspace.create_child_page',
+                            page_id=page.id
+                        ) }}"
+                        class="primary-button"
+                    >
+                        + Add Subpage
+                    </a>
+                    <a href="{{ url_for('workspace.page_history', page_id=page.id) }}"  class="secondary-button">
+                        Version History
+                    </a>
                     <form
                         method="POST"
                         action="{{ url_for(
                             'workspace.delete_page',
                             page_id=page.id
                         ) }}"
-                        onsubmit="return confirm(
-                            'Delete this page?'
-                        );"
+                        onsubmit="return confirm('Delete this page and its subpages?');"
                     >
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button
-                            type="submit"
-                            class="danger-button"
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="{{ csrf_token() }}"
                         >
+
+                        <button type="submit" class="danger-button">
                             Delete
                         </button>
                     </form>
@@ -160,7 +153,6 @@
                 </div>
 
             </div>
-
 
             <article class="page-content-card">
 
@@ -170,16 +162,78 @@
 
             </article>
 
+            <!-- Nested pages section -->
+
+            <section class="subpages-section">
+
+                <div class="section-header">
+
+                    <div>
+                        <p class="eyebrow">Page Organization</p>
+                        <h2>Subpages</h2>
+                    </div>
+
+                    <a
+                        href="{{ url_for(
+                            'workspace.create_child_page',
+                            page_id=page.id
+                        ) }}"
+                        class="secondary-button"
+                    >
+                        + New Subpage
+                    </a>
+
+                </div>
+
+                {% if child_pages %}
+
+                    <div class="subpage-list">
+
+                        {% for child in child_pages %}
+
+                            <a
+                                href="{{ url_for(
+                                    'workspace.view_page',
+                                    page_id=child.id
+                                ) }}"
+                                class="subpage-item"
+                            >
+
+                                <span class="subpage-icon">▤</span>
+
+                                <span class="subpage-title">
+                                    {{ child.title }}
+                                </span>
+
+                                <span class="subpage-arrow">→</span>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-subpages">
+                        <p>No subpages yet.</p>
+                        <span>Create a subpage to organize related notes.</span>
+                    </div>
+
+                {% endif %}
+
+            </section>
 
             <div class="page-footer">
 
                 <a
                     href="{{ url_for(
-                        'workspace.workspaces'
+                        'workspace.workspace_detail',
+                        workspace_id=page.workspace_id
                     ) }}"
                     class="text-link"
                 >
-                    ← Back to Workspaces
+                    ← Back to Workspace
                 </a>
 
             </div>

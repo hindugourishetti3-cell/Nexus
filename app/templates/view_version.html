@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Version | Nexus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark">N</span>
+            <span>Nexus</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span> Dashboard
+            </a>
+            <a href="{{ url_for('workspace.workspaces') }}" class="nav-item active">
+                <span class="nav-icon">▣</span> Workspaces
+            </a>
+            <a href="{{ url_for('workspace.search') }}" class="nav-item">
+                <span class="nav-icon">⌕</span> Search
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="nav-item">
+                <span class="nav-icon">↪</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <div class="main-shell">
+
+        <header class="topbar">
+            <form class="top-search" method="GET"
+                  action="{{ url_for('workspace.search') }}">
+                <span>⌕</span>
+                <input type="text" name="q"
+                       placeholder="Search your knowledge...">
+            </form>
+
+            <div class="topbar-user">
+                <div class="avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>Knowledge space</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+
+            <div class="breadcrumb">
+                <a href="{{ url_for('workspace.workspaces') }}">Workspaces</a>
+                <span>›</span>
+                <a href="{{ url_for('workspace.view_page', page_id=page.id) }}">
+                    {{ page.title }}
+                </a>
+                <span>›</span>
+                <a href="{{ url_for('workspace.page_history', page_id=page.id) }}">
+                    Version History
+                </a>
+                <span>›</span>
+                <span>Previous Version</span>
+            </div>
+
+            <div class="page-header">
+                <div>
+                    <p class="eyebrow">Version Details</p>
+                    <h1>{{ version.title }}</h1>
+                    <p class="page-subtitle">
+                        Saved on
+                        {{ version.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                    </p>
+                </div>
+
+                <div class="header-actions">
+                    <a href="{{ url_for('workspace.page_history', page_id=page.id) }}"
+                       class="secondary-button">
+                        ← Back to History
+                    </a>
+                </div>
+            </div>
+
+            <article class="page-content-card">
+                <div class="version-content-heading">
+                    <h2>Saved Content</h2>
+                    <span class="result-count">Previous Version</span>
+                </div>
+
+                <div class="markdown-content version-content">
+                    {{ version.content }}
+                </div>
+            </article>
+
+            <section class="restore-section">
+                <div>
+                    <h3>Restore this version?</h3>
+                    <p>
+                        Your current page content will be saved as a version
+                        before this older version is restored.
+                    </p>
+                </div>
+
+                <form method="POST"
+                      action="{{ url_for(
+                          'workspace.restore_version',
+                          page_id=page.id,
+                          version_id=version.id
+                      ) }}"
+                      onsubmit="return confirm('Restore this version?');">
+
+                    <input type="hidden" name="csrf_token"
+                           value="{{ csrf_token() }}">
+
+                    <button type="submit" class="primary-button">
+                        Restore This Version
+                    </button>
+                </form>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

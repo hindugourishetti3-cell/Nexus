@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
-    Nexus - {{ "Edit Page" if page else "Create Page" }}
+        Nexus - 
+        {% if page %}
+            Edit Page
+        {% elif parent_page %}
+            Create Subpage
+        {% else %}
+            Create Page
+        {% endif %}
     </title>
 
     <link
@@ -98,6 +106,8 @@
 
         <main class="main-content">
 
+            <!-- Breadcrumb -->
+
             <div class="breadcrumb">
 
                 <a href="{{ url_for('workspace.workspaces') }}">
@@ -106,32 +116,66 @@
 
                 <span>›</span>
 
-                <a
-                    href="{{ url_for(
-                        'workspace.workspace_detail',
-                        workspace_id=workspace.id
-                    ) }}"
-                >
+                <a href="{{ url_for(
+                    'workspace.workspace_detail',
+                    workspace_id=workspace.id
+                ) }}">
                     {{ workspace.name }}
                 </a>
 
-                <span>›</span>
+                {% if parent_page %}
 
-                <span>New Page</span>
+                    <span>›</span>
+
+                    <a href="{{ url_for(
+                        'workspace.view_page',
+                        page_id=parent_page.id
+                    ) }}">
+                        {{ parent_page.title }}
+                    </a>
+
+                    <span>›</span>
+                    <span>New Subpage</span>
+
+                {% else %}
+
+                    <span>›</span>
+
+                    <span>
+                        {{ "Edit Page" if page else "New Page" }}
+                    </span>
+
+                {% endif %}
 
             </div>
 
+
+            <!-- Page Header -->
 
             <div class="page-header">
 
                 <div>
 
                     <p class="eyebrow">
-                        {{ workspace.name }}
+
+                        {% if parent_page %}
+                            Subpage of {{ parent_page.title }}
+                        {% else %}
+                            {{ workspace.name }}
+                        {% endif %}
+
                     </p>
 
                     <h1>
-                        {{ "Edit Page" if page else "Create a New Page" }}
+
+                        {% if page %}
+                            Edit Page
+                        {% elif parent_page %}
+                            Create a Subpage
+                        {% else %}
+                            Create a New Page
+                        {% endif %}
+
                     </h1>
 
                     <p class="page-subtitle">
@@ -143,10 +187,18 @@
             </div>
 
 
+            <!-- Editor -->
+
             <section class="editor-card">
 
                 <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
                     <div class="form-group">
 
                         <label for="title">
@@ -171,30 +223,39 @@
                             Content
                         </label>
 
-                        
-<div class="editor-layout">
+                        <!-- Markdown Editor and Preview -->
 
-    <textarea
-        id="content"
-        name="content"
-        class="page-editor"
-        placeholder="# Your notes
+                        <div class="editor-layout">
+
+                            <textarea
+                                id="content"
+                                name="content"
+                                class="page-editor"
+                                placeholder="# Your notes
 
 Start writing your knowledge here...
 
 ## Example
 
 You can use **Markdown** to format your content."
-    >{{ page.content if page else '' }}</textarea>
+                            >{{ page.content if page else '' }}</textarea>
 
-    <div class="preview-panel">
-        <div class="preview-heading">Live Preview</div>
-        <div id="markdown-preview" class="preview-content">
-            Start typing to see your preview...
-        </div>
-    </div>
+                            <div class="preview-panel">
 
-</div>
+                                <div class="preview-heading">
+                                    Live Preview
+                                </div>
+
+                                <div
+                                    id="markdown-preview"
+                                    class="preview-content"
+                                >
+                                    Start typing to see your preview...
+                                </div>
+
+                            </div>
+
+                        </div>
 
 
                         <div class="editor-hint">
@@ -205,13 +266,27 @@ You can use **Markdown** to format your content."
                     </div>
 
 
+                    <!-- Form Actions -->
+
                     <div class="form-actions">
 
                         <a
-                            href="{{ url_for(
-                                'workspace.workspace_detail',
-                                workspace_id=workspace.id
-                            ) }}"
+                            href="{% if parent_page %}
+                                {{ url_for(
+                                    'workspace.view_page',
+                                    page_id=parent_page.id
+                                ) }}
+                            {% elif page and page.parent %}
+                                {{ url_for(
+                                    'workspace.view_page',
+                                    page_id=page.parent.id
+                                ) }}
+                            {% else %}
+                                {{ url_for(
+                                    'workspace.workspace_detail',
+                                    workspace_id=workspace.id
+                                ) }}
+                            {% endif %}"
                             class="secondary-button"
                         >
                             Cancel
@@ -221,7 +296,15 @@ You can use **Markdown** to format your content."
                             type="submit"
                             class="primary-button"
                         >
-                            {{ "Save Changes" if page else "Create Page" }}
+
+                            {% if page %}
+                                Save Changes
+                            {% elif parent_page %}
+                                Create Subpage
+                            {% else %}
+                                Create Page
+                            {% endif %}
+
                         </button>
 
                     </div>
@@ -236,33 +319,49 @@ You can use **Markdown** to format your content."
 
 </div>
 
+
+<!-- Markdown Preview Libraries -->
+
 <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 
+
+<!-- Live Markdown Preview -->
+
 <script>
+
     const editor = document.getElementById("content");
     const preview = document.getElementById("markdown-preview");
 
     function updatePreview() {
+
         const markdownText = editor.value;
 
-        if (typeof marked === "undefined" ||
-            typeof DOMPurify === "undefined") {
+        if (
+            typeof marked === "undefined" ||
+            typeof DOMPurify === "undefined"
+        ) {
+
             preview.textContent =
                 "Preview libraries unavailable. Check your internet connection.";
+
             return;
         }
 
-        const html = marked.parse(markdownText || "*Start writing...*");
+        const html = marked.parse(
+            markdownText || "*Start writing...*"
+        );
 
         preview.innerHTML = DOMPurify.sanitize(html);
+
     }
 
     editor.addEventListener("input", updatePreview);
 
     updatePreview();
-</script>
 
+</script>
 
 </body>
 </html>

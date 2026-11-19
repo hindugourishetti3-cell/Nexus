@@ -5,11 +5,12 @@ import bleach
 from flask_login import login_required, current_user
 from .database import db
 from .models import Workspace, Page
+from .models import Workspace, Page, PageVersion
 
 workspace = Blueprint("workspace", __name__)
 
 
-# Helper: retrieve only the logged-in user's workspace
+# Retrieve only the logged-in user's workspace
 def get_owned_workspace(workspace_id):
     return Workspace.query.filter_by(
         id=workspace_id,
@@ -17,7 +18,7 @@ def get_owned_workspace(workspace_id):
     ).first_or_404()
 
 
-# Helper: retrieve only pages belonging to the logged-in user
+# Retrieve only pages belonging to the logged-in user
 def get_owned_page(page_id):
     return Page.query.join(
         Workspace,
@@ -28,7 +29,7 @@ def get_owned_page(page_id):
     ).first_or_404()
 
 
-# Display all workspaces belonging to the current user
+# Display all workspaces
 @workspace.route("/workspaces")
 @login_required
 def workspaces():
@@ -42,7 +43,7 @@ def workspaces():
     )
 
 
-# Create a new workspace
+# Create a workspace
 @workspace.route("/workspace/create", methods=["GET", "POST"])
 @login_required
 def create_workspace():
@@ -67,14 +68,15 @@ def create_workspace():
     return render_template("create_workspace.html")
 
 
-# Display a workspace and its pages
+# Display workspace and its main pages
 @workspace.route("/workspace/<int:workspace_id>")
 @login_required
 def workspace_detail(workspace_id):
     selected_workspace = get_owned_workspace(workspace_id)
 
     pages = Page.query.filter_by(
-        workspace_id=selected_workspace.id
+        workspace_id=selected_workspace.id,
+        parent_id=None
     ).all()
 
     return render_template(
@@ -84,7 +86,7 @@ def workspace_detail(workspace_id):
     )
 
 
-# Create a page inside an owned workspace
+# Create a main page inside a workspace
 @workspace.route(
     "/workspace/<int:workspace_id>/page/create",
     methods=["GET", "POST"]
@@ -106,7 +108,8 @@ def create_page(workspace_id):
         new_page = Page(
             title=title,
             content=content,
-            workspace_id=selected_workspace.id
+            workspace_id=selected_workspace.id,
+            parent_id=None
         )
 
         db.session.add(new_page)
@@ -125,7 +128,55 @@ def create_page(workspace_id):
     )
 
 
-# View an owned page
+# Create a child page inside an existing page
+@workspace.route(
+    "/page/<int:page_id>/child/create",
+    methods=["GET", "POST"]
+)
+@login_required
+def create_child_page(page_id):
+    parent_page = get_owned_page(page_id)
+
+    selected_workspace = get_owned_workspace(
+        parent_page.workspace_id
+    )
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "")
+
+        if not title:
+            return render_template(
+                "create_page.html",
+                workspace=selected_workspace,
+                parent_page=parent_page
+            )
+
+        new_page = Page(
+            title=title,
+            content=content,
+            workspace_id=selected_workspace.id,
+            parent_id=parent_page.id
+        )
+
+        db.session.add(new_page)
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "workspace.view_page",
+                page_id=parent_page.id
+            )
+        )
+
+    return render_template(
+        "create_page.html",
+        workspace=selected_workspace,
+        parent_page=parent_page
+    )
+
+
+# View a page
 @workspace.route("/page/<int:page_id>")
 @login_required
 def view_page(page_id):
@@ -162,46 +213,52 @@ def view_page(page_id):
     return render_template(
         "page.html",
         page=page,
-        rendered_content=rendered_content
+        rendered_content=rendered_content,
+        child_pages=page.children
     )
 
 
-# Edit an owned page
 @workspace.route("/page/<int:page_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_page(page_id):
     page = get_owned_page(page_id)
+    selected_workspace = get_owned_workspace(page.workspace_id)
 
     if request.method == "POST":
         title = request.form.get("title", "").strip()
+        content = request.form.get("content", "")
 
         if not title:
             return render_template(
                 "create_page.html",
                 page=page,
-                workspace=Workspace.query.get_or_404(page.workspace_id)
+                workspace=selected_workspace
             )
 
+        # Save the previous version before updating
+        old_version = PageVersion(
+            page_id=page.id,
+            title=page.title,
+            content=page.content or ""
+        )
+
+        db.session.add(old_version)
+
         page.title = title
-        page.content = request.form.get("content", "")
+        page.content = content
 
         db.session.commit()
 
-        return redirect(
-            url_for(
-                "workspace.view_page",
-                page_id=page.id
-            )
-        )
+        return redirect(url_for("workspace.view_page", page_id=page.id))
 
     return render_template(
         "create_page.html",
         page=page,
-        workspace=Workspace.query.get_or_404(page.workspace_id)
+        workspace=selected_workspace
     )
 
 
-# Delete an owned page
+# Delete a page and its nested children
 @workspace.route("/page/<int:page_id>/delete", methods=["POST"])
 @login_required
 def delete_page(page_id):
@@ -220,7 +277,7 @@ def delete_page(page_id):
     )
 
 
-# Edit an owned workspace
+# Edit a workspace
 @workspace.route(
     "/workspace/<int:workspace_id>/edit",
     methods=["GET", "POST"]
@@ -258,7 +315,7 @@ def edit_workspace(workspace_id):
     )
 
 
-# Delete an owned workspace and its pages
+# Delete a workspace and its pages
 @workspace.route(
     "/workspace/<int:workspace_id>/delete",
     methods=["POST"]
@@ -267,9 +324,13 @@ def edit_workspace(workspace_id):
 def delete_workspace(workspace_id):
     selected_workspace = get_owned_workspace(workspace_id)
 
-    Page.query.filter_by(
-        workspace_id=selected_workspace.id
-    ).delete()
+    root_pages = Page.query.filter_by(
+        workspace_id=selected_workspace.id,
+        parent_id=None
+    ).all()
+
+    for page in root_pages:
+        db.session.delete(page)
 
     db.session.delete(selected_workspace)
     db.session.commit()
@@ -277,7 +338,7 @@ def delete_workspace(workspace_id):
     return redirect(url_for("workspace.workspaces"))
 
 
-# Search only the current user's content
+# Search the current user's content
 @workspace.route("/search")
 @login_required
 def search():
@@ -312,3 +373,64 @@ def search():
         workspaces=workspaces,
         pages=pages
     )
+@workspace.route("/page/<int:page_id>/history")
+@login_required
+def page_history(page_id):
+    page = get_owned_page(page_id)
+
+    versions = PageVersion.query.filter_by(
+        page_id=page.id
+    ).order_by(PageVersion.created_at.desc()).all()
+
+    return render_template(
+        "page_history.html",
+        page=page,
+        versions=versions
+    )
+
+
+@workspace.route("/page/<int:page_id>/history/<int:version_id>")
+@login_required
+def view_version(page_id, version_id):
+    page = get_owned_page(page_id)
+
+    version = PageVersion.query.filter_by(
+        id=version_id,
+        page_id=page.id
+    ).first_or_404()
+
+    return render_template(
+        "view_version.html",
+        page=page,
+        version=version
+    )
+
+
+@workspace.route(
+    "/page/<int:page_id>/history/<int:version_id>/restore",
+    methods=["POST"]
+)
+@login_required
+def restore_version(page_id, version_id):
+    page = get_owned_page(page_id)
+
+    version = PageVersion.query.filter_by(
+        id=version_id,
+        page_id=page.id
+    ).first_or_404()
+
+    # Save current content before restoring
+    current_version = PageVersion(
+        page_id=page.id,
+        title=page.title,
+        content=page.content or ""
+    )
+
+    db.session.add(current_version)
+
+    page.title = version.title
+    page.content = version.content
+
+    db.session.commit()
+
+    return redirect(url_for("workspace.view_page", page_id=page.id))

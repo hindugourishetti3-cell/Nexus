@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version History | Nexus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark">N</span>
+            <span>Nexus</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span> Dashboard
+            </a>
+            <a href="{{ url_for('workspace.workspaces') }}" class="nav-item active">
+                <span class="nav-icon">▣</span> Workspaces
+            </a>
+            <a href="{{ url_for('workspace.search') }}" class="nav-item">
+                <span class="nav-icon">⌕</span> Search
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="nav-item">
+                <span class="nav-icon">↪</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <div class="main-shell">
+
+        <header class="topbar">
+            <form class="top-search" method="GET"
+                  action="{{ url_for('workspace.search') }}">
+                <span>⌕</span>
+                <input type="text" name="q"
+                       placeholder="Search your knowledge...">
+            </form>
+
+            <div class="topbar-user">
+                <div class="avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>Knowledge space</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+
+            <div class="breadcrumb">
+                <a href="{{ url_for('workspace.workspaces') }}">Workspaces</a>
+                <span>›</span>
+                <a href="{{ url_for('workspace.view_page', page_id=page.id) }}">
+                    {{ page.title }}
+                </a>
+                <span>›</span>
+                <span>Version History</span>
+            </div>
+
+            <div class="page-header">
+                <div>
+                    <p class="eyebrow">Page Management</p>
+                    <h1>Version History</h1>
+                    <p class="page-subtitle">
+                        Previous saved versions of {{ page.title }}
+                    </p>
+                </div>
+
+                <div class="header-actions">
+                    <a href="{{ url_for('workspace.view_page', page_id=page.id) }}"
+                       class="secondary-button">
+                        ← Back to Page
+                    </a>
+                </div>
+            </div>
+
+            <section class="version-section">
+
+                <div class="version-section-heading">
+                    <div>
+                        <h2>Previous Versions</h2>
+                        <p>View or restore an earlier version of this page.</p>
+                    </div>
+                    <span class="result-count">{{ versions|length }}</span>
+                </div>
+
+                {% if versions %}
+                    <div class="version-list">
+
+                        {% for version in versions %}
+                            <div class="version-card">
+
+                                <div class="version-icon">↺</div>
+
+                                <div class="version-details">
+                                    <strong>{{ version.title }}</strong>
+                                    <span>
+                                        Saved on
+                                        {{ version.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                                    </span>
+                                </div>
+
+                                <a href="{{ url_for(
+                                    'workspace.view_version',
+                                    page_id=page.id,
+                                    version_id=version.id
+                                ) }}" class="secondary-button">
+                                    View Version →
+                                </a>
+
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">↺</div>
+                        <h3>No previous versions yet</h3>
+                        <p>Previous versions will appear here when you edit this page.</p>
+                    </div>
+                {% endif %}
+
+            </section>
+
+        </main>
+    </div>
+</div>
+
+</body>
+</html>
