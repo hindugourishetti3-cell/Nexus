@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph | Nexus</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/vis-network/styles/vis-network.min.css">
+
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f7fb;
+            color: #222;
+        }
+
+        .page-container {
+            padding: 35px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #777;
+        }
+
+        .graph-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            color: #777;
+        }
+
+        #knowledge-graph {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .secondary-button,
+        .primary-button {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .secondary-button {
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+        }
+
+        .primary-button {
+            background: #7057d9;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .page-container { padding: 15px; }
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            #knowledge-graph { height: 450px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="page-header">
+        <div>
+            <h1>Knowledge Graph</h1>
+            <p>Explore connections between pages in {{ workspace.name }}</p>
+        </div>
+
+        <a href="{{ url_for('workspace.workspace_detail', workspace_id=workspace.id) }}"
+           class="secondary-button">
+            Back to Workspace
+        </a>
+    </div>
+
+    {% if graph_nodes %}
+
+    <div class="graph-toolbar">
+        <span>{{ graph_nodes|length }} pages</span>
+        <span>{{ graph_edges|length }} connections</span>
+
+        <button type="button" class="secondary-button" id="reset-graph">
+            Reset View
+        </button>
+    </div>
+
+    <div id="knowledge-graph"></div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <h2>No pages to display</h2>
+        <p>Create pages and connect them using [[Page Title]] to build your graph.</p>
+
+        <a href="{{ url_for('workspace.create_page', workspace_id=workspace.id) }}"
+           class="primary-button">
+            Create Page
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% if graph_nodes %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const graphNodes = {{ graph_nodes | tojson }};
+    const graphEdges = {{ graph_edges | tojson }};
+
+    const nodes = new vis.DataSet(
+        graphNodes.map(node => ({
+            ...node,
+            shape: "dot",
+            size: 22,
+            color: {
+                background: "#7057d9",
+                border: "#5942bd",
+                highlight: {
+                    background: "#927cf0",
+                    border: "#5942bd"
+                }
+            },
+            font: {
+                color: "#333333",
+                size: 15
+            }
+        }))
+    );
+
+    const edges = new vis.DataSet(
+        graphEdges.map(edge => ({
+            ...edge,
+            arrows: {
+                to: {
+                    enabled: true,
+                    scaleFactor: 0.6
+                }
+            }
+        }))
+    );
+
+    const container = document.getElementById("knowledge-graph");
+
+    const network = new vis.Network(
+        container,
+        { nodes, edges },
+        {
+            autoResize: true,
+            interaction: {
+                hover: true,
+                navigationButtons: true,
+                keyboard: true
+            },
+            physics: {
+                stabilization: { iterations: 150 }
+            },
+            nodes: {
+                borderWidth: 2,
+                font: { size: 15, face: "Arial" }
+            },
+            edges: {
+                color: {
+                    color: "#aab2c5",
+                    highlight: "#7057d9"
+                },
+                smooth: { type: "dynamic" }
+            }
+        }
+    );
+
+    network.on("click", function (params) {
+        if (params.nodes.length > 0) {
+            const selected = nodes.get(params.nodes[0]);
+
+            if (selected && selected.url) {
+                window.location.href = selected.url;
+            }
+        }
+    });
+
+    document.getElementById("reset-graph").addEventListener("click", function () {
+        network.fit();
+    });
+
+});
+</script>
+{% endif %}
+
+</body>
+</html>

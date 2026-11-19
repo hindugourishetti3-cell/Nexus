@@ -138,6 +138,68 @@ def workspace_detail(workspace_id):
     )
 
 
+# Knowledge Graph
+@workspace.route("/workspace/<int:workspace_id>/graph")
+@login_required
+def knowledge_graph(workspace_id):
+    selected_workspace = get_owned_workspace(workspace_id)
+
+    # Fetch every page, including nested pages
+    pages = Page.query.filter_by(
+        workspace_id=selected_workspace.id
+    ).order_by(Page.id.asc()).all()
+
+    # Map page titles to their corresponding pages
+    pages_by_title = {}
+
+    for page in pages:
+        pages_by_title.setdefault(page.title.strip().casefold(), page)
+
+    # Prepare graph nodes
+    graph_nodes = [
+        {
+            "id": page.id,
+            "label": page.title,
+            "url": url_for(
+                "workspace.view_page",
+                page_id=page.id
+            )
+        }
+        for page in pages
+    ]
+
+    # Prepare connections between pages
+    graph_edges = []
+    existing_edges = set()
+
+    pattern = re.compile(r"\[\[\s*(.*?)\s*\]\]")
+
+    for source_page in pages:
+        matches = pattern.finditer(source_page.content or "")
+
+        for match in matches:
+            title = match.group(1).strip().casefold()
+
+            target_page = pages_by_title.get(title)
+
+            if target_page and target_page.id != source_page.id:
+                edge = (source_page.id, target_page.id)
+
+                if edge not in existing_edges:
+                    existing_edges.add(edge)
+
+                    graph_edges.append({
+                        "from": source_page.id,
+                        "to": target_page.id
+                    })
+
+    return render_template(
+        "knowledge_graph.html",
+        workspace=selected_workspace,
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges
+    )
+
 # Create a main page inside a workspace
 @workspace.route(
     "/workspace/<int:workspace_id>/page/create",

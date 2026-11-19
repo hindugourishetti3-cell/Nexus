@@ -151,13 +151,14 @@
 
 
                 <div class="header-actions">
-                    <a
-                        href="{{ url_for(
-                            'workspace.create_page',
-                            workspace_id=workspace.id
-                        ) }}"
-                        class="primary-button"
-                    >
+
+                    <a href="{{ url_for('workspace.knowledge_graph', workspace_id=workspace.id) }}"
+                    class="secondary-button">
+                        Knowledge Graph
+                    </a>
+
+                    <a href="{{ url_for('workspace.create_page', workspace_id=workspace.id) }}"
+                    class="primary-button">
                         + New Page
                     </a>
 
